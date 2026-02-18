@@ -107,6 +107,32 @@
       </div>
     </div>
 
+    <!-- Rounds -->
+    <div class="card">
+      <h2>3. Set Number of Rounds</h2>
+      <p class="card-hint">
+        <b>Exploration</b> (Sobol) samples the space quasi-randomly.
+        <b>Optimization</b> (MOBO) uses a surrogate model to focus on promising recipes.
+      </p>
+      <div class="rounds-inputs">
+        <div class="rounds-row">
+          <label for="n-sobol">
+            <span>Exploration</span>
+            <span class="phase-chip sobol">Sobol</span>
+          </label>
+          <input id="n-sobol" type="number" min="1" max="100" value="15" oninput="updateStartBtn()" />
+        </div>
+        <div class="rounds-row">
+          <label for="n-bo">
+            <span>Optimization</span>
+            <span class="phase-chip bo">MOBO</span>
+          </label>
+          <input id="n-bo" type="number" min="1" max="100" value="10" oninput="updateStartBtn()" />
+        </div>
+      </div>
+      <p class="rounds-total" id="rounds-total">Total: 25 rounds</p>
+    </div>
+
     <!-- Start -->
     <button id="start-btn" class="btn-primary btn-large" onclick="startOptimization()">
       Start Optimization (25 rounds)
@@ -196,7 +222,7 @@
     <div class="hero">
       <div class="hero-icon">🏆</div>
       <h1>Optimization Complete!</h1>
-      <p class="hero-sub">All 25 rounds finished. Here are your optimal recipes.</p>
+      <p class="hero-sub" id="complete-sub">All 25 rounds finished. Here are your optimal recipes.</p>
     </div>
 
     <!-- Final Pareto Average -->

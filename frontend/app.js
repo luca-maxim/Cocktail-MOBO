@@ -12,8 +12,8 @@ const API_BASE = "http://localhost:8000";
 // ─────────────────────────────────────────────────────────────
 const state = {
   ingredients: [],          // string[]
-  objectives: ["Sweetness", "Strength", "Balance"],  // string[3]
-  objectiveDirections: ["max", "max", "max"],         // "max"|"min" per objective
+  objectives: ["Sweetness", "Sourness", "Bitterness"],  // string[3]
+  objectiveDirections: ["max", "max", "min"],         // "max"|"min" per objective
   nSobol: 15,
   nBo: 10,
   currentSuggestion: null,  // { iteration, phase, amounts }
@@ -122,6 +122,14 @@ function setDir(n, dir, btn) {
      .forEach(b => b.classList.toggle("active", b === btn));
 }
 
+function updateStartBtn() {
+  const nSobol = Math.max(1, parseInt(document.getElementById("n-sobol").value) || 15);
+  const nBo    = Math.max(1, parseInt(document.getElementById("n-bo").value)    || 10);
+  const total  = nSobol + nBo;
+  document.getElementById("rounds-total").textContent = `Total: ${total} rounds`;
+  document.getElementById("start-btn").textContent    = `Start Optimization (${total} rounds)`;
+}
+
 async function startOptimization() {
   // Validate ingredients
   if (state.ingredients.length < 2) {
@@ -141,6 +149,20 @@ async function startOptimization() {
   }
 
   state.objectives = objectives;
+
+  // Read and validate round counts
+  const nSobol = parseInt(document.getElementById("n-sobol").value);
+  const nBo    = parseInt(document.getElementById("n-bo").value);
+  if (!nSobol || nSobol < 1) {
+    showToast("Exploration rounds must be at least 1.", "error");
+    return;
+  }
+  if (!nBo || nBo < 1) {
+    showToast("Optimization rounds must be at least 1.", "error");
+    return;
+  }
+  state.nSobol = nSobol;
+  state.nBo    = nBo;
 
   const startBtn = document.getElementById("start-btn");
   startBtn.disabled = true;
@@ -539,6 +561,13 @@ function renderHistoryTable(tableId, history) {
 // ─────────────────────────────────────────────────────────────
 function showComplete(appState) {
   const pareto = appState.pareto_front;
+  const total  = state.nSobol + state.nBo;
+
+  // Update dynamic text in completion screen
+  const completeSub = document.getElementById("complete-sub");
+  if (completeSub) completeSub.textContent = `All ${total} rounds finished. Here are your optimal recipes.`;
+  const finalHint = document.getElementById("final-chart-hint");
+  if (finalHint) finalHint.textContent = `Complete view of all ${total} tastings. Drag to rotate · Scroll to zoom.`;
 
   // Final Pareto average recipe
   renderAmounts("final-recipe", pareto.avg_ingredients);
@@ -610,6 +639,8 @@ async function confirmReset() {
   state.ingredients = [];
   state.objectives = ["Sweetness", "Strength", "Balance"];
   state.objectiveDirections = ["max", "max", "max"];
+  state.nSobol = 15;
+  state.nBo    = 10;
   state.ratings = [null, null, null];
   state.currentSuggestion = null;
   state.history = [];
@@ -620,6 +651,9 @@ async function confirmReset() {
   document.getElementById("obj1").value = "Sweetness";
   document.getElementById("obj2").value = "Strength";
   document.getElementById("obj3").value = "Balance";
+  document.getElementById("n-sobol").value = 15;
+  document.getElementById("n-bo").value    = 10;
+  updateStartBtn();
 
   // Reset direction toggles to Max
   document.querySelectorAll(".dir-toggle").forEach(toggle => {
@@ -661,6 +695,7 @@ function registerSW() {
 document.addEventListener("DOMContentLoaded", () => {
   registerSW();
   renderIngredientTags();
+  updateStartBtn();
 
   // Allow pressing Enter in ingredient input
   document.getElementById("ingredient-input").addEventListener("keydown", (e) => {

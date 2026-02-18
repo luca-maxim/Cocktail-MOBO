@@ -2,12 +2,26 @@
 
 A Progressive Web App that uses **Multi-Objective Bayesian Optimization** (via [BoTorch](https://github.com/meta-pytorch/botorch)) to find the optimal cocktail recipe by iterating on human taste feedback.
 
+## Screenshots
+
+| Setup | Optimization loop |
+|:---:|:---:|
+| ![Setup screen](docs/screenshots/setup.png) | ![Optimization screen](docs/screenshots/optimize.png) |
+
+| Pareto front (3D) | Results |
+|:---:|:---:|
+| ![Pareto chart](docs/screenshots/pareto.png) | ![Complete screen](docs/screenshots/complete.png) |
+
+> **To add screenshots:** run the app, take a screenshot of each view, and save the files to `docs/screenshots/` using the filenames above.
+
+---
+
 ## How it works
 
-| Phase | Rounds | Method |
+| Phase | Default rounds | Method |
 |---|---|---|
-| Exploration | 15 | Sobol quasi-random sampling |
-| Optimization | 10 | qNoisyExpectedHypervolumeImprovement (qNEHVI) |
+| Exploration | 15 (configurable) | Sobol quasi-random sampling |
+| Optimization | 10 (configurable) | qNoisyExpectedHypervolumeImprovement (qNEHVI) |
 
 After each tasting the app:
 1. Records your 3-objective Likert ratings (1–10 scale)
@@ -58,9 +72,9 @@ python main.py
 
 ## App flow
 
-1. **Setup** – Enter your cocktail ingredients and name the 3 objectives you want to optimise (e.g., Sweetness, Strength, Balance).
-2. **Exploration (15 rounds)** – The app suggests Sobol-sampled ingredient amounts. Taste each cocktail and rate each objective 1–10.
-3. **Optimisation (10 rounds)** – The BoTorch MOBO model (qNEHVI) proposes ingredient amounts that are predicted to improve the multi-objective trade-off.
+1. **Setup** – Enter your ingredients, name the 3 objectives (e.g., Sweetness, Strength, Balance), choose a direction (↑ Max / ↓ Min) for each, and set the number of Exploration and Optimization rounds.
+2. **Exploration** – The app suggests Sobol-sampled ingredient amounts. Taste each cocktail and rate each objective 1–10.
+3. **Optimisation** – The BoTorch MOBO model (qNEHVI) proposes ingredient amounts that are predicted to improve the multi-objective trade-off.
 4. **Results** – A full Pareto-front is shown, with the averaged optimal recipe highlighted.
 
 ### Ingredient amounts

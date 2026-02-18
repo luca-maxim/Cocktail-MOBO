@@ -215,6 +215,55 @@ input[type="text"]::placeholder { color: var(--muted); }
   border-radius: 999px;
 }
 
+/* ── Number input ───────────────────────────────────────── */
+input[type="number"] {
+  width: 72px;
+  background: var(--bg2);
+  border: 1.5px solid var(--card-border);
+  color: var(--text);
+  font-size: 0.92rem;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color var(--transition);
+  font-family: inherit;
+  text-align: center;
+  -moz-appearance: textfield;
+}
+input[type="number"]:focus { border-color: var(--accent); }
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { opacity: 1; }
+
+/* ── Rounds inputs ──────────────────────────────────────── */
+.rounds-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.rounds-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.rounds-row label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  min-width: 160px;
+  flex-shrink: 0;
+  cursor: default;
+}
+.rounds-total {
+  font-size: 0.82rem;
+  color: var(--muted);
+  text-align: right;
+  padding-top: 8px;
+  border-top: 1px solid var(--card-border);
+}
+
 /* ── Objective inputs ───────────────────────────────────── */
 .objective-inputs { display: flex; flex-direction: column; gap: 10px; }
 .objective-inputs label { display: flex; align-items: center; gap: 10px; }
