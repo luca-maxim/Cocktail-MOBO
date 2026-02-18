@@ -4,15 +4,29 @@ A Progressive Web App that uses **Multi-Objective Bayesian Optimization** (via [
 
 ## Screenshots
 
-| Setup | Optimization loop |
-|:---:|:---:|
-| ![Setup screen](docs/screenshots/setup.png) | ![Optimization screen](docs/screenshots/optimize.png) |
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <img src="docs/screenshots/setup.png" width="220" alt="Setup screen"/><br/>
+        <sub><b>① Setup</b></sub>
+      </td>
+      <td align="center">
+        <img src="docs/screenshots/optimize.png" width="220" alt="Optimization loop"/><br/>
+        <sub><b>② Optimization loop</b></sub>
+      </td>
+      <td align="center">
+        <img src="docs/screenshots/pareto.png" width="220" alt="Pareto front (3D)"/><br/>
+        <sub><b>③ Pareto front (3D)</b></sub>
+      </td>
+      <td align="center">
+        <img src="docs/screenshots/complete.png" width="220" alt="Results"/><br/>
+        <sub><b>④ Results</b></sub>
+      </td>
+    </tr>
+  </table>
+</div>
 
-| Pareto front (3D) | Results |
-|:---:|:---:|
-| ![Pareto chart](docs/screenshots/pareto.png) | ![Complete screen](docs/screenshots/complete.png) |
-
-> **To add screenshots:** run the app, take a screenshot of each view, and save the files to `docs/screenshots/` using the filenames above.
 
 ---
 
