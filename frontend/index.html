@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f0f1a" />
+  <meta name="description" content="Multi-objective Bayesian optimization for the perfect cocktail" />
+  <title>Cocktail MOBO Optimizer</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+  <!-- Plotly.js for interactive 3-D Pareto front chart -->
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     GLOBAL HEADER
+═══════════════════════════════════════════════ -->
+<header id="app-header">
+  <div class="header-inner">
+    <span class="logo">🍹 CocktailOpt</span>
+    <button id="reset-btn" class="btn-ghost hidden" onclick="confirmReset()">Reset</button>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════
+     TOAST NOTIFICATION
+═══════════════════════════════════════════════ -->
+<div id="toast" class="toast hidden"></div>
+
+<!-- ══════════════════════════════════════════════
+     LOADING OVERLAY
+═══════════════════════════════════════════════ -->
+<div id="loading-overlay" class="loading-overlay hidden">
+  <div class="spinner"></div>
+  <p id="loading-msg">Calculating next recipe…</p>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MAIN APP
+═══════════════════════════════════════════════ -->
+<main id="app">
+
+  <!-- ────────────────────────────────────────
+       STEP 1 – SETUP
+  ──────────────────────────────────────────── -->
+  <section id="step-setup" class="step active">
+    <div class="hero">
+      <div class="hero-icon">🍹</div>
+      <h1>Cocktail MOBO</h1>
+      <p class="hero-sub">Multi-Objective Bayesian Optimization<br>for the perfect cocktail recipe</p>
+    </div>
+
+    <!-- Ingredients -->
+    <div class="card">
+      <h2>1. Choose Ingredients</h2>
+      <p class="card-hint">Add at least 2 ingredients you'll use in your cocktail.</p>
+
+      <div id="ingredient-tags" class="tag-list"></div>
+
+      <div class="input-row">
+        <input
+          id="ingredient-input"
+          type="text"
+          placeholder="e.g., Vodka, Lime Juice, Simple Syrup…"
+          autocomplete="off"
+          maxlength="40"
+          onkeydown="if(event.key==='Enter') addIngredient()"
+        />
+        <button class="btn-accent" onclick="addIngredient()">Add</button>
+      </div>
+    </div>
+
+    <!-- Objectives -->
+    <div class="card">
+      <h2>2. Name Your Objectives</h2>
+      <p class="card-hint">Rate cocktails on 3 dimensions (e.g., Sweetness, Strength, Overall).</p>
+
+      <div class="objective-inputs">
+        <div class="obj-row">
+          <span class="obj-num">①</span>
+          <input id="obj1" type="text" placeholder="e.g., Sweetness" maxlength="30" value="Sweetness" />
+          <div class="dir-toggle">
+            <button class="dir-btn active" onclick="setDir(1,'max',this)">↑ Max</button>
+            <button class="dir-btn"        onclick="setDir(1,'min',this)">↓ Min</button>
+          </div>
+        </div>
+        <div class="obj-row">
+          <span class="obj-num">②</span>
+          <input id="obj2" type="text" placeholder="e.g., Sourness" maxlength="30" value="Sourness" />
+          <div class="dir-toggle">
+            <button class="dir-btn active" onclick="setDir(2,'max',this)">↑ Max</button>
+            <button class="dir-btn"        onclick="setDir(2,'min',this)">↓ Min</button>
+          </div>
+        </div>
+        <div class="obj-row">
+          <span class="obj-num">③</span>
+          <input id="obj3" type="text" placeholder="e.g., Bitterness" maxlength="30" value="Bitterness" />
+          <div class="dir-toggle">
+            <button class="dir-btn" onclick="setDir(3,'max',this)">↑ Max</button>
+            <button class="dir-btn active" onclick="setDir(3,'min',this)">↓ Min</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Start -->
+    <button id="start-btn" class="btn-primary btn-large" onclick="startOptimization()">
+      Start Optimization (25 rounds)
+    </button>
+  </section>
+
+  <!-- ────────────────────────────────────────
+       STEP 2 – OPTIMIZATION LOOP
+  ──────────────────────────────────────────── -->
+  <section id="step-optimize" class="step">
+
+    <!-- Progress -->
+    <div class="progress-section">
+      <div class="progress-meta">
+        <span id="progress-label">Iteration 0 / 25</span>
+        <span id="phase-badge" class="phase-badge sobol">Sobol Phase</span>
+      </div>
+      <div class="progress-track">
+        <div id="progress-bar" class="progress-bar" style="width:0%"></div>
+        <div id="progress-sobol-end" class="progress-marker"></div>
+      </div>
+      <div class="progress-legend">
+        <span><i class="dot sobol"></i> Sobol (exploration)</span>
+        <span><i class="dot bo"></i> MOBO (optimization)</span>
+      </div>
+    </div>
+
+    <!-- Suggested Recipe -->
+    <div class="card" id="suggestion-card">
+      <div class="card-header">
+        <h2>Try This Mix!</h2>
+        <span class="iter-tag" id="iter-tag">Round 1</span>
+      </div>
+      <div id="ingredient-amounts" class="amounts-grid"></div>
+    </div>
+
+    <!-- Rating -->
+    <div class="card" id="rating-card">
+      <h2>Rate This Cocktail</h2>
+      <p class="card-hint">Taste the cocktail and rate each dimension</p>
+      <div id="rating-inputs" class="rating-inputs"></div>
+      <button id="submit-btn" class="btn-primary btn-large" onclick="submitRating()">
+        Submit &amp; Get Next Recipe
+      </button>
+    </div>
+
+    <!-- Pareto Average (shown after ≥1 evaluation) -->
+    <div class="card" id="pareto-card" style="display:none">
+      <div class="card-header">
+        <h2>Current Best Recipe</h2>
+        <span class="pareto-count-badge" id="pareto-count-badge">0 Pareto-optimal</span>
+      </div>
+      <p class="card-hint">Averaged amounts across all Pareto-optimal iterations.</p>
+      <div id="pareto-amounts" class="amounts-grid"></div>
+    </div>
+
+    <!-- Pareto Front 3-D Chart (shown after ≥2 evaluations) -->
+    <div class="card" id="pareto-chart-card" style="display:none">
+      <div class="card-header">
+        <h2>Objective Space — Pareto Front</h2>
+        <span class="pareto-count-badge" id="chart-pareto-badge">0 Pareto-optimal</span>
+      </div>
+      <p class="card-hint">
+        Each dot is one tasted cocktail. Gold diamonds are Pareto-optimal — no other recipe beats them on all three objectives simultaneously.
+        Drag to rotate &middot; Scroll to zoom &middot; Hover for details.
+      </p>
+      <div id="pareto-chart-3d" class="chart-container"></div>
+    </div>
+
+    <!-- History Table -->
+    <div class="card" id="history-card" style="display:none">
+      <h2>Iteration History</h2>
+      <div class="table-wrap">
+        <table id="history-table">
+          <thead id="history-thead"></thead>
+          <tbody id="history-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ────────────────────────────────────────
+       STEP 3 – COMPLETE
+  ──────────────────────────────────────────── -->
+  <section id="step-complete" class="step">
+    <div class="hero">
+      <div class="hero-icon">🏆</div>
+      <h1>Optimization Complete!</h1>
+      <p class="hero-sub">All 25 rounds finished. Here are your optimal recipes.</p>
+    </div>
+
+    <!-- Final Pareto Average -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Optimal Recipe (Pareto Average)</h2>
+        <span class="pareto-count-badge" id="final-pareto-count"></span>
+      </div>
+      <p class="card-hint">This recipe is the average of all Pareto-optimal cocktails found.</p>
+      <div id="final-recipe" class="amounts-grid"></div>
+    </div>
+
+    <!-- Final 3-D Pareto Chart -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Objective Space — Final Pareto Front</h2>
+        <span class="pareto-count-badge" id="final-chart-badge"></span>
+      </div>
+      <p class="card-hint">Complete view of all 25 tastings. Drag to rotate &middot; Scroll to zoom.</p>
+      <div id="final-chart-3d" class="chart-container"></div>
+    </div>
+
+    <!-- All Pareto Recipes -->
+    <div class="card" id="final-pareto-list-card">
+      <h2>All Pareto-Optimal Recipes</h2>
+      <div id="final-pareto-list"></div>
+    </div>
+
+    <!-- Full Table -->
+    <div class="card">
+      <h2>Full Iteration History</h2>
+      <div class="table-wrap">
+        <table id="final-table">
+          <thead id="final-thead"></thead>
+          <tbody id="final-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <button class="btn-primary btn-large" onclick="confirmReset()">Start a New Session</button>
+  </section>
+
+</main>
+
+<script src="/app.js"></script>
+</body>
+</html>
