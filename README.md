@@ -2,6 +2,8 @@
 
 A Progressive Web App that uses **Multi-Objective Bayesian Optimization** (via [BoTorch](https://github.com/meta-pytorch/botorch)) to find the optimal cocktail recipe by iterating on human taste feedback.
 
+**This is an example application developed to demonstrate the functionality of MOBO**
+
 ## Screenshots
 
 <div align="center">
