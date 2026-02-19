@@ -4,6 +4,8 @@ A Progressive Web App that uses **Multi-Objective Bayesian Optimization** (via [
 
 **This is an example application developed to demonstrate the functionality of MOBO**
 
+**Demo at [CocktailMOBO.luca-maxim-meinhardt.me](https://cocktailmobo.luca-maxim-meinhardt.me/)**
+
 ## Screenshots
 
 <div align="center">
