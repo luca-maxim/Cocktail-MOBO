@@ -1,11 +1,11 @@
 /* ═══════════════════════════════════════════════════════════════
    Cocktail MOBO — Frontend Application
-   Communicates with FastAPI backend at http://localhost:8000
+   Communicates with FastAPI backend (relative URLs for production)
 ═══════════════════════════════════════════════════════════════ */
 
 "use strict";
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = "";  // relative URLs — works on any host
 
 // ─────────────────────────────────────────────────────────────
 // Application state
@@ -60,7 +60,6 @@ function showStep(stepName) {
   const resetBtn = document.getElementById("reset-btn");
   resetBtn.classList.toggle("hidden", stepName === "setup");
 
-  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -200,6 +199,7 @@ async function loadNextSuggestion() {
     state.currentSuggestion = suggestion;
     state.ratings = [null, null, null];
     displaySuggestion(suggestion);
+    window.scrollTo({ top: 0, behavior: "smooth" });
     resetRatingButtons();
     updateProgress(suggestion.iteration - 1, suggestion.total_iterations);
     document.getElementById("submit-btn").disabled = false;
