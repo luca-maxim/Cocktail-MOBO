@@ -649,16 +649,17 @@ async function confirmReset() {
   // Reset UI
   renderIngredientTags();
   document.getElementById("obj1").value = "Sweetness";
-  document.getElementById("obj2").value = "Strength";
-  document.getElementById("obj3").value = "Balance";
+  document.getElementById("obj2").value = "Sourness";
+  document.getElementById("obj3").value = "Bitterness";
   document.getElementById("n-sobol").value = 15;
   document.getElementById("n-bo").value    = 10;
   updateStartBtn();
 
-  // Reset direction toggles to Max
-  document.querySelectorAll(".dir-toggle").forEach(toggle => {
-    toggle.querySelectorAll(".dir-btn").forEach((btn, i) => {
-      btn.classList.toggle("active", i === 0);  // first button = Max
+  // Reset direction toggles to match default directions (index 0 = Max, 1 = Min)
+  document.querySelectorAll(".dir-toggle").forEach((toggle, toggleIdx) => {
+    const targetIdx = state.objectiveDirections[toggleIdx] === "max" ? 0 : 1;
+    toggle.querySelectorAll(".dir-btn").forEach((btn, btnIdx) => {
+      btn.classList.toggle("active", btnIdx === targetIdx);
     });
   });
 
