@@ -637,8 +637,8 @@ async function confirmReset() {
 
   // Reset local state
   state.ingredients = [];
-  state.objectives = ["Sweetness", "Strength", "Balance"];
-  state.objectiveDirections = ["max", "max", "max"];
+  state.objectives = ["Sweetness", "Sourness", "Bitterness"];
+  state.objectiveDirections = ["max", "max", "min"];
   state.nSobol = 15;
   state.nBo    = 10;
   state.ratings = [null, null, null];
